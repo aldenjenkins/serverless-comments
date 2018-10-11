@@ -1,0 +1,40 @@
+# Welcome to serverless. Read the docs
+# https://serverless.com/framework/docs/
+
+# Serverless.yml is the configuration the CLI
+# uses to deploy your code to your provider of choice
+
+# The `service` block is the name of the service
+service: comments
+
+# The `provider` block defines where your service will be deployed
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: prod
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Resource: "*"
+      Action:
+        - "dynamodb:*"
+        - "dax:*"
+        - "ses:SendEmail"
+        - "ses:SendRawEmail"
+
+# The `functions` block defines what code to deploy
+functions:
+  comment:
+    handler: handler.processCommentRequest
+    # The `events` block defines how to trigger the handler.helloWorld code
+    events:
+      - http:
+          path: printComments/{id}
+          method: get
+          cors: true
+          integration: LAMBDA 
+      - http:
+          path: createComment
+          method: post
+          cors: true
+          integration: LAMBDA

@@ -1,0 +1,70 @@
+<h1>Serverless Comment System</h1>
+
+<p>Deploy an entirely functional comment system to your entirely static website.</p>
+
+<h1>Features</h1>
+
+<ul>
+<li>AWS Lambda</li>
+<li>Google reCAPTCHA verification</li>
+<li>DynamoDB</li>
+<li>SES mailing to the site owner for comment updates</li>
+</ul>
+
+
+<h1>Installation</h1>
+
+<ul>
+<li>Install the <a href="https://serverless.com/">serverless framework</a></li>
+<li>Create an AWS account</li>
+<li>Add IAM permissions for serverless. Serverless has a <a href="https://www.youtube.com/watch?v=KngM5bfpttA">video tutorial</a>, but ive included the instructions below
+
+<ul>
+<li>In the AWS search bar, search for “IAM”.</li>
+<li>On the IAM page, click on “Users” on the sidebar, then the “Add user” button.</li>
+<li>On the Add user page, give the user a name – something like “serverless” is appropriate. Check “Programmatic access” under Access type then click next.</li>
+<li>On the permissions screen, click on the “Attach existing policies directly” tab, search for “AdministratorAccess” in the list, check it, and click next.</li>
+<li>On the review screen you should see your user name, with “Programmatic access”, and “AdministratorAccess”, then create the user.</li>
+<li>The confirmation screen shows the user “Access key ID” and “Secret access key”, you’ll need these to provide the Serverless Framework with access. In your CLI, type
+  <code>yarn sls config credentials --provider aws --key YOUR_ACCESS_KEY_ID --secret YOUR_SECRET_ACCESS_KEY</code>, replacing YOUR_ACCESS_KEY_ID and YOUR_SECRET_ACCESS_KEY with the keys on the confirmation screen.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Your credentials are configured now, but while we’re in the AWS console let’s</p>
+
+<ul>
+<li><p><a href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html">Set up Simple Email Service</a></p>
+
+<ul>
+<li>Click Console Home in the top left corner to go home.</li>
+<li>On the home page, in the AWS search bar, search for “Simple Email Service”.</li>
+<li>On the SES Home page, click on “Email Addresses” in the sidebar.</li>
+<li>On the Email Addresses listing page, click the “Verify a New Email Address” button.</li>
+<li>In the dialog window, type your email address then click “Verify This Email Address”.</li>
+<li>You’ll receive an email in moments containing a link to verify the address. Click on the link to complete the process.</li>
+</ul>
+</li>
+<li><p>Create a DynamoDB table. I recommend using a partition key called
+“page” of type “string”, and a primary sort key called “ts” (“timestamp” is a reserved word in dynamodb) of type “number”.
+call the table “\<your name\>-comments”:</p></li>
+<li></li>
+<li><code>cp config.json.example config.json</code></li>
+<li>Edit config.json to make it your own values</li>
+<li>Run serverless Deploy</li>
+</ul>
+
+
+<h1>Troubleshooting</h1>
+
+<ul>
+<li>Be sure you are using the same Jquery link provided in the form.html, using
+a different version can change the names of data when they are sent during
+requests. Ex. one version of jquery sends a post that includes
+<code>"method": "POST"</code> while another Jquery version refers to it in the request
+as <code>"httpMethod": "POST"</code></li>
+<li>Be sure you include the <code>integration: LAMBDA</code> in serverless.yaml, otherwise
+  you will run into CORS issues.</li>
+</ul>
+

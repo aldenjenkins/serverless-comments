@@ -1,0 +1,6 @@
+{
+    "captchaSecret": "yourrecaptchasecretkey",
+    "sendMailTo":"example@example.com",
+    "dynamoTable":"<your name>-comments"
+    "baseUrl":"https://aldenjenkins.com/blog/"
+}

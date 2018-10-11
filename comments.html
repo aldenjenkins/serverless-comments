@@ -1,0 +1,174 @@
+      <section>
+         <div style="display: flex; justify-content: center; text-align: center;">
+            <button class="comment_button" id="show_comments" style="max-width:100%;">Show Comments</button>
+         </div>
+         <div id="comments">
+         </div>
+         <div id="submit-comments">
+            <h2>Add a comment</h2>
+            <div id="submit-error" class="submit-error"></div>
+            <form id="submit-form"  title="">
+               Name:<br /><input maxlength=30 id="submit-name"  name="name" class="comment_input form_field" type="text" /><br />
+               Website (optional):<br /><input id="submit-website" name="website" class="comment_input" type="text" /><br />
+               Comment:<br />
+               <textarea maxlength=500 id="submit-comment" class="comment_input form_field" name="comment"></textarea>
+               <br />
+               <div class="g-recaptcha" id="recaptcha" data-sitekey="<yourkey>" ></div>
+               <input type="submit" class="comment_button" id="submit-button" />
+            </form>
+         </div>
+         <script type="text/javascript">
+            $(document).ready(function() {
+              $('#submit-comments').hide();
+              $('#show_comments').on('click', function(){
+                $('#submit-comments').show();
+                var renderComments = () => {
+                  const article = window.location.pathname.split('/')[2];
+                  var url = `<your-deployed-serverless-url>${article}`;
+                  console.log(url)
+                  var a = $.get(url, function(data, err) {
+                    if(data){
+                      data.body = JSON.parse(data.body);
+                      var c = $('#comments')[0];
+                      c.innerHTML = "";
+                      var comments = data.body["Items"];
+                      if (comments.length != 0) {
+                        if (comments.length == 1){
+                          c.innerHTML += `<h1>1 Comment</h1>`;
+                        }else{
+                          c.innerHTML += `<h1>${comments.length} Comments</h1>`;
+                        }
+                        function timeSince(date) {
+                          console.log(date);
+                          var seconds  = Math.floor((new Date() - date)/1000),
+                              interval = Math.floor(seconds / 31536000);
+
+                            console.log("seconds: " + seconds + " interval: " + interval)
+                          if (interval >= 1) {
+                            return interval + "y";
+                          }
+                          interval = Math.floor(seconds / 2592000);
+                          if (interval >= 1) {
+                            return interval + "mo";
+                          }
+                          interval = Math.floor(seconds / 86400);
+                          if (interval >= 1) {
+                            return interval + "d";
+                          }
+                          interval = Math.floor(seconds / 3600);
+                          if (interval >= 1) {
+                            return interval + "h";
+                          }
+                          interval = Math.floor(seconds / 60);
+                          if (interval >= 1) {
+                            return interval + "m";
+                          }
+                          //if (interval < 30){
+                          //  return "Just now";
+                          //}
+                          return Math.floor(seconds) + "s";
+                        }
+                        comments.forEach(function(com) {
+                          const body = $('<div/>').text(decodeURI(com.comment.S)).html().replace(/\n/g, '<br />');
+                          const name = $('<div/>').text(com.name.S).html();
+                          //var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                          //const date = $('<div/>').text(new Date(parseInt(com.ts.N)).toLocaleDateString("en-US", options).toString()).html();
+                          const date = $('<div/>').text(timeSince(new Date(parseInt(com.ts.N)))).html();
+                          var website = $('<div/>').text(com.website.S).html();
+                          if (!website.startsWith('http') && website !== 'null') {
+                            website = "http://" + website;
+                          }
+                          var toAdd = `<div class="one-comment"><div class="comment-name">`;
+                          if (website !== 'null') {
+                            toAdd += `<a href="${website}">`;
+                          }
+                          toAdd += `${name}`;
+                          if (website !== 'null') {
+                            toAdd += `</a>`;
+                          }
+                            //toAdd += `</div><div class="comment-time">${date}</div><div class="comment-body"><p>${body}</p></div></div>`;
+                            toAdd += ` <span style="color:gray;">&#183; ${date}</span></div><div class="comment-body"><p>${body}</p></div></div>`;
+                          c.innerHTML += toAdd;
+                        });
+                      }
+                    }
+                  });
+                };
+                renderComments();
+                var formEnabled = true;
+                var submitForm = (event) => {
+                  if (!formEnabled) {
+                    return false;
+                  }
+                  var form = $(this);
+                  console.log(form);
+                  const name = $("#submit-name")[0].value;
+                  const website = $("#submit-website")[0].value;
+                  const comment = $("#submit-comment")[0].value;
+                  const article = window.location.pathname.split('/')[2];
+                  var recaptcha = $("#g-recaptcha-response").val()
+                  $("#submit-error")[0].innerHTML = "";
+                  var isValid = true;
+                  $('.form_field').each(function() {
+                    console.log($(this).val());
+                    if ( $(this).val() === '' )
+                        isValid = false;
+                  });
+                  if (!isValid){
+                    alert("Please fill out all form fields");
+                    return false; 
+                  }else if(recaptcha === ""){
+                    alert("Please fill out the captcha");
+                    return false; 
+                  }
+                  toggleForm();
+                  console.log('disabling form');
+                  var a = $.ajax({
+                    type: "POST",
+                    url: `https://<your-serverless-deployed-url>`,
+                    data: {
+                        "name":name,
+                        "website":website,
+                        "comment":comment,
+                        "article":article,
+                        "g-recaptcha-response":recaptcha
+                    },
+                    success: function(msg) {
+                      msg.body = JSON.parse(msg.body);
+                        console.log(msg.body);
+                      if (msg.body.result === "error") {
+                        $("#submit-error")[0].innerHTML = `Error: ${msg.body.reason}`;
+                      } else {
+                        renderComments();
+                        $("#submit-name")[0].value = "";
+                        $("#submit-website")[0].value = "";
+                        $("#submit-comment")[0].value = "";
+                        $("#g-recaptcha-response")[0].value = "";
+                      }
+                      toggleForm();
+                    },
+                    error: function(err) {
+                      console.log("error: ",err);
+                      $("#submit-error")[0].innerHTML = `Error: ${err}`;
+                      toggleForm();
+                    }
+                  });
+                  // We have to return false, to keep the form from POSTing to the server
+                  // with a reaload
+                  return false;
+                }
+                $( "#submit-form" ).submit(submitForm);
+                var toggleForm = () => {
+                  formEnabled = !formEnabled;
+                  $("#submit-name")[0].disabled = !$("#submit-name")[0].disabled;
+                  $("#submit-website")[0].disabled = !$("#submit-website")[0].disabled;
+                  $("#submit-comment")[0].disabled = !$("#submit-comment")[0].disabled;
+                  $("#g-recaptcha-response").disabled = !$("#g-recaptcha-response").disabled;
+                  $("#submit-button")[0].disabled = !$("#submit-button")[0].disabled;
+                  grecaptcha.reset();
+                };
+                $(this).fadeOut();
+              });
+            });
+         </script>
+      </section>
