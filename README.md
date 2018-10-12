@@ -1,6 +1,8 @@
 # Serverless Comment System
 Deploy an entirely functional comment system to your entirely static website.
 
+![](docs/usage.gif)
+
 # Features
 * AWS Lambda
 * Google reCAPTCHA verification
@@ -9,6 +11,7 @@ Deploy an entirely functional comment system to your entirely static website.
 
 # Installation
 * Install the [serverless framework](https://serverless.com/)
+    ![serverless framework](docs/serverless-framework.png)
 * Create an AWS account
 * Add IAM permissions for serverless. Serverless has a [video tutorial](https://www.youtube.com/watch?v=KngM5bfpttA), but ive included the instructions below
   - In the AWS search bar, search for “IAM”.
@@ -22,7 +25,7 @@ Deploy an entirely functional comment system to your entirely static website.
 Your credentials are configured now, but while we’re in the AWS console let’s 
 
 * [Set up Simple Email Service](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)
-
+![amazon ses image](docs/aws.png)
   - Click Console Home in the top left corner to go home.
   - On the home page, in the AWS search bar, search for “Simple Email Service”.
   - On the SES Home page, click on “Email Addresses” in the sidebar.
@@ -32,9 +35,8 @@ Your credentials are configured now, but while we’re in the AWS console let’
 
 * Create a DynamoDB table. I recommend using a partition key called 
 “page” of type “string”, and a primary sort key called “ts” (“timestamp” is a reserved word in dynamodb) of type “number”. 
-call the table “\<your name\>-comments”:
-* 
-* `cp config.json.example config.json` 
+call the table “&lt;your name&gt;-comments”:
+* create your config file with `cp config.json.example config.json` 
 * Edit config.json to make it your own values
 * Run serverless Deploy
 
